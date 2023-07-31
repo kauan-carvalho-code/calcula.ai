@@ -1,10 +1,11 @@
-import React, { createContext, useMemo, useState } from "react";
+import React, { createContext, useCallback, useMemo, useState } from "react";
 
 import { Paper } from "../interfaces/paper";
 
 interface PapersContextData {
   papers: Paper[];
-  createPaper: (paper: Paper) => void;
+  getPaperById: (paperId: number) => Paper | undefined;
+  createPaper: (paper: Omit<Paper, 'id'>) => void;
   updatePaper: (paperId: number, paper: Paper) => void;
   deletePaper: (paperId: number) => void;
 }
@@ -21,15 +22,21 @@ export const PapersProvider = ({ children }: PapersProviderProps) => {
   */
   const [ papers, setPapers ] = useState<Paper[]>([]);
 
-  const createPaper = (paper: Paper) => {
-    setPapers(prevState => [...prevState, paper])
+  const getPaperById = useCallback((paperId: number) => papers.find(paper => paper.id === paperId), [ papers ]);
+
+  const createPaper = (paper: Omit<Paper, 'id'>) => {
+    setPapers(prevState => [...prevState, { id: prevState.length + 1, ...paper }])
   }
 
   const updatePaper = (paperId: number, updatedPaper: Paper) => {
     setPapers(prevState => {
-      const updatedPapers = [ ...prevState ]
+      const updatedPapers = prevState.map((paper) => {
+        if (paper.id === paperId) {
+          return updatedPaper;
+        }
 
-      updatedPapers[paperId] = updatedPaper
+        return paper;
+      })
 
       return updatedPapers
     })
@@ -41,10 +48,11 @@ export const PapersProvider = ({ children }: PapersProviderProps) => {
 
   const value = useMemo(() => ({
     papers,
+    getPaperById,
     createPaper,
     updatePaper,
     deletePaper,
-  }), [ papers ]);
+  }), [ papers, getPaperById ]);
 
   return (
     <PapersContext.Provider value={value}>

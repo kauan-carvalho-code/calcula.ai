@@ -2,14 +2,18 @@ import React, { forwardRef } from "react"
 
 import { BiSearch } from 'react-icons/bi'
 
+import { Input } from "./Input"
+
 interface SearchBarProps extends React.ComponentProps<'input'> {}
 
 export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>((props, ref) => (
-  <label htmlFor="search_bar" className="h-10 w-96 flex items-center px-2 border border-solid border-violet-600 rounded-lg">
-    <input ref={ref} {...props} id="search_bar" type="text" className="w-full outline-transparent" />
+  <div className="w-96 relative">
+    <Input {...props} type="text" ref={ref} />
 
-    <BiSearch className="text-xl text-violet-800" />
-  </label>
+    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
+      <BiSearch />
+    </div>
+  </div>
 ))
 
 SearchBar.displayName = 'SearchBar'

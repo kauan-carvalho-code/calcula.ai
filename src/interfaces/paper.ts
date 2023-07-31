@@ -1,12 +1,8 @@
-interface PaperSize {
-  width: number;
-  height: number;
-}
-
 export interface Paper {
   id: number;
   name: string;
-  size: PaperSize;
+  width: number;
+  height: number;
   value: number;
   grammage: number;
 }

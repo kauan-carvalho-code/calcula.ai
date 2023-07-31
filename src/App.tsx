@@ -27,10 +27,6 @@ function App() {
         <Routes location={previousLocation || location}>
           <Route path="/" element={<Papers />} />
 
-          <Route element={<WithDialog />}>
-            <Route path="editar/:paperId" element={<Edit />} />
-          </Route>
-
           <Route path="calculadora" element={<Calculator />} />
         </Routes>
 
@@ -38,6 +34,8 @@ function App() {
           <Routes>
             <Route element={<WithDialog />}>
               <Route path="criar" element={<Create />} />
+
+              <Route path="editar/:paperId" element={<Edit />} />
             </Route>
           </Routes>
         ) : null}

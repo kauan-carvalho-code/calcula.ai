@@ -25,21 +25,21 @@ const Edit = () => {
   /*
    * Hooks
    */
-  const { paperId } = useParams();
+  const { paperId = '' } = useParams();
 
   const { getPaperById, updatePaper } = usePapers();
 
-  const { register, handleSubmit, formState: { isValid } } = useForm({
+  const { register, handleSubmit, formState: { isValid, isSubmitting } } = useForm({
     resolver: yupResolver(schema),
-    defaultValues: getPaperById(Number(paperId)),
+    defaultValues: getPaperById(paperId),
   });
 
   const navigate = useNavigate()
 
   const backToPreviousPage = () => navigate(-1);
 
-  const onSubmit = handleSubmit(data => {
-    updatePaper(Number(paperId), { id: Number(paperId), ...data })
+  const onSubmit = handleSubmit(async (data) => {
+    await updatePaper(paperId, { id: paperId, ...data })
 
     backToPreviousPage()
   })
@@ -64,7 +64,9 @@ const Edit = () => {
             Cancelar
           </Button>
 
-          <Button type="submit" responsive disabled={!isValid}>Editar</Button>
+          <Button type="submit" responsive disabled={!isValid || isSubmitting} isLoading={isSubmitting}>
+            Editar
+          </Button>
         </div>
       </form>
     </div>

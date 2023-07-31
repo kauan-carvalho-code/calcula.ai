@@ -27,7 +27,7 @@ const Create = () => {
    */
   const { createPaper } = usePapers();
 
-  const { register, handleSubmit, formState: { isValid } } = useForm({
+  const { register, handleSubmit, formState: { isValid, isSubmitting } } = useForm({
     resolver: yupResolver(schema)
   });
 
@@ -35,8 +35,8 @@ const Create = () => {
 
   const backToPreviousPage = () => navigate(-1);
 
-  const onSubmit = handleSubmit(data => {
-    createPaper(data)
+  const onSubmit = handleSubmit(async (data) => {
+    await createPaper(data)
 
     backToPreviousPage()
   })
@@ -61,7 +61,9 @@ const Create = () => {
             Cancelar
           </Button>
 
-          <Button type="submit" responsive disabled={!isValid}>Criar</Button>
+          <Button type="submit" responsive disabled={!isValid || isSubmitting} isLoading={isSubmitting}>
+            Criar
+          </Button>
         </div>
       </form>
     </div>

@@ -22,25 +22,25 @@ function App() {
   const previousLocation = location.state?.previousLocation;
 
   return (
-    <PapersProvider>
-      <SideBar>
-        <Routes location={previousLocation || location}>
-          <Route path="/" element={<Papers />} />
+    <SideBar>
+      <PapersProvider>
+          <Routes location={previousLocation || location}>
+            <Route path="/" element={<Papers />} />
 
-          <Route path="calculadora" element={<Calculator />} />
-        </Routes>
-
-        {previousLocation ? (
-          <Routes>
-            <Route element={<WithDialog />}>
-              <Route path="criar" element={<Create />} />
-
-              <Route path="editar/:paperId" element={<Edit />} />
-            </Route>
+            <Route path="calculadora" element={<Calculator />} />
           </Routes>
-        ) : null}
-      </SideBar>
-    </PapersProvider>
+
+          {previousLocation ? (
+            <Routes>
+              <Route element={<WithDialog />}>
+                <Route path="criar" element={<Create />} />
+
+                <Route path="editar/:paperId" element={<Edit />} />
+              </Route>
+            </Routes>
+          ) : null}
+      </PapersProvider>
+    </SideBar>
   );
 }
 

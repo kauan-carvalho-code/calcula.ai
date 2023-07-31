@@ -12,6 +12,9 @@ import { Anchor } from "../components/Anchor";
 // Hooks
 import { usePapers } from "../hooks/usePapers";
 
+// Utils
+import { formatCurrency } from "../utils/formatCurrency";
+
 function Papers() {
   /*
    * Hooks
@@ -74,7 +77,7 @@ function Papers() {
                 {paper.grammage} gr
               </td>
               <td scope="row" className="px-6 py-3">
-                {paper.value}
+                {formatCurrency(paper.value / 100)}
               </td>
               <td scope="row" className="flex items-center justify-start text-lg pt-3.5 gap-4 px-6 py-3">
                 <Link

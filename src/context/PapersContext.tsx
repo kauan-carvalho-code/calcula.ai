@@ -1,62 +1,123 @@
-import React, { createContext, useCallback, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
-import { Paper } from "../interfaces/paper";
+// Components
+import { Loading } from "../components/Loading";
+
+// Interfaces
+import { Paper, PaperWithoutId } from "../interfaces/paper";
+
+// Services
+import { rootApi } from "../services/rootApi";
 
 interface PapersContextData {
   papers: Paper[];
-  getPaperById: (paperId: number) => Paper | undefined;
-  createPaper: (paper: Omit<Paper, 'id'>) => void;
-  updatePaper: (paperId: number, paper: Paper) => void;
-  deletePaper: (paperId: number) => void;
+  getPaperById: (paperId: string) => Paper;
+  createPaper: (paper: PaperWithoutId) => Promise<void>;
+  updatePaper: (paperId: string, paper: Paper) => Promise<void>;
+  deletePaper: (paperId: string) => Promise<void>;
 }
 
-export const PapersContext = createContext<PapersContextData>({} as PapersContextData);
+export const PapersContext = createContext<PapersContextData>(
+  {} as PapersContextData
+);
 
 interface PapersProviderProps {
   children: React.ReactNode;
 }
 
 export const PapersProvider = ({ children }: PapersProviderProps) => {
-  /* 
-    * Hooks 
-  */
-  const [ papers, setPapers ] = useState<Paper[]>([]);
+  /*
+   * Hooks
+   */
+  const [papers, setPapers] = useState<Paper[]>([]);
 
-  const getPaperById = useCallback((paperId: number) => papers.find(paper => paper.id === paperId), [ papers ]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const createPaper = (paper: Omit<Paper, 'id'>) => {
-    setPapers(prevState => [...prevState, { id: prevState.length + 1, ...paper }])
-  }
+  const getPaperById = useCallback(
+    (paperId: string) => {
+      const paper = papers.find((paper) => paper.id === paperId);
 
-  const updatePaper = (paperId: number, updatedPaper: Paper) => {
-    setPapers(prevState => {
-      const updatedPapers = prevState.map((paper) => {
-        if (paper.id === paperId) {
-          return updatedPaper;
-        }
+      return paper || ({} as Paper);
+    },
+    [papers]
+  );
 
-        return paper;
-      })
+  const createPaper = async (paper: PaperWithoutId) => {
+    try {
+      const response = await rootApi.create(paper);
 
-      return updatedPapers
-    })
-  }
+      setPapers((prevState) => [...prevState, response]);
+    } catch (error) {
+      console.error("Erro ao criar um novo papel!", error);
+    }
+  };
 
-  const deletePaper = (paperId: number) => {
-    setPapers(prevState => prevState.filter(paper => paper.id !== paperId))
-  }
+  const updatePaper = async (paperId: string, updatedPaper: Paper) => {
+    try {
+      const response = await rootApi.update(paperId, updatedPaper);
 
-  const value = useMemo(() => ({
-    papers,
-    getPaperById,
-    createPaper,
-    updatePaper,
-    deletePaper,
-  }), [ papers, getPaperById ]);
+      setPapers((prevState) =>
+        prevState.map((paper) => {
+          if (paper.id === paperId) {
+            return response;
+          }
+
+          return paper;
+        })
+      );
+    } catch (error) {
+      console.error("Erro ao editar um papel!", error);
+    }
+  };
+
+  const deletePaper = async (paperId: string) => {
+    try {
+      await rootApi.delete(paperId);
+
+      setPapers((prevState) =>
+        prevState.filter((paper) => paper.id !== paperId)
+      );
+    } catch (error) {
+      console.error("Erro ao deletar um papel!", error);
+    }
+  };
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const papers = await rootApi.get();
+
+        setPapers(papers);
+      } catch (error) {
+        console.error("Erro ao consultar os papéis!", error);
+      }
+
+      setIsLoading(false);
+    };
+
+    getData();
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      papers,
+      getPaperById,
+      createPaper,
+      updatePaper,
+      deletePaper,
+    }),
+    [papers, getPaperById]
+  );
 
   return (
     <PapersContext.Provider value={value}>
-      { children }
+      {isLoading ? <Loading /> : children}
     </PapersContext.Provider>
-  )
-}
+  );
+};

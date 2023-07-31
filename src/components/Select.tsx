@@ -6,7 +6,7 @@ interface SelectProps extends React.ComponentProps<'select'> {
   variant?: 'solid' | 'ghost'
 }
 
-const defaultStyles = "flex items-center justify-center gap-2 font-medium rounded-lg text-sm px-5 py-2.5 w-full focus:outline-violet-600"
+const defaultStyles = "flex items-center justify-center gap-2 font-medium rounded-lg text-sm px-5 py-2.5 w-full bg-gray-200 focus:outline-violet-600"
 
 
 const selectVariants = {

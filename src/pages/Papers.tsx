@@ -19,7 +19,7 @@ function Papers() {
   /*
    * Hooks
    */
-  const { papers, deletePaper } = usePapers();
+  const { papers, deletePaper } = usePapers();  
 
   const [query, setQuery] = useState('');
 

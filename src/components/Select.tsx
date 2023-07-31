@@ -1,33 +1,31 @@
 import React, { forwardRef } from 'react';
+import { Paper } from '../interfaces/paper';
 
 interface SelectProps extends React.ComponentProps<'select'> {
-  label?: string;
-  options?: Array<{ value: string; label: string }>;
-  variant?: 'solid' | 'ghost'
-}
-
-const defaultStyles = "flex items-center justify-center gap-2 font-medium rounded-lg text-sm px-5 py-2.5 w-full bg-gray-200 focus:outline-violet-600"
-
-
-const selectVariants = {
-  solid: 'text-white bg-violet-600 hover:bg-violet-700 disabled:bg-neutral-200',
-  ghost: 'text-violet-600 hover:text-violet-700 hover:bg-neutral-200'
+  name?: string;
+  options?: Paper[];
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, id, options,variant='ghost', ...rest }, ref) => (
-    <label htmlFor={id}>
-      {label}
-
-      <select ref={ref} {...rest} id={id} className={`${defaultStyles} ${selectVariants[variant]}`}>
-        {options?.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </label>
-  )
+  ({ name, id, options, className, ...rest }, ref) => {
+    return (
+      <label className='text-sm font-medium' htmlFor={id}>
+        {name}
+        <select
+          ref={ref}
+          {...rest}
+          id={id}
+          className={`bg-gray-50 border border-gray-300 text-sm font-normal rounded-lg focus:via-violet-600 focus:border-violet-600 block w-full p-2.5 outline-violet-600 ${className}`}
+        >
+          {options?.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.name}
+            </option>
+          ))}
+        </select>
+      </label>
+    );
+  }
 );
 
 Select.displayName = 'Select';

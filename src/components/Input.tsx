@@ -1,6 +1,6 @@
 import React, { forwardRef } from "react";
 
-interface InputProps extends React.ComponentProps<"input"> {
+interface InputProps extends React.ComponentProps<'input'> {
   label?: string;
 }
 

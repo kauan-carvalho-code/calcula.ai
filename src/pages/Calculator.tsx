@@ -6,6 +6,7 @@ import { usePapers } from '../hooks/usePapers';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useState } from 'react';
 
 const schema = yup.object().shape({
   paper: yup.string().required('Selecione o papel'),
@@ -17,13 +18,18 @@ const schema = yup.object().shape({
     .number()
     .required('Digite o custo por página')
     .positive('O custo por página deve ser maior que zero'),
-  bloodLetting: yup.number(),
-  height: yup.number(),
-  width: yup.number(),
+  bloodLetting: yup.number().required(),
+  height: yup.number().required(),
+  width: yup.number().required(),
 });
 
 function Calculator() {
   const { papers, getPaperById } = usePapers();
+  const [results, setResults] = useState({
+    qtdPerPaper: 0,
+    qtdPaper: 0,
+    cost: 0,
+  });
 
   const {
     handleSubmit,
@@ -35,10 +41,61 @@ function Calculator() {
 
   const handleChange = (value: string) => {
     const selectedPaper = getPaperById(value);
-    console.log(selectedPaper);
+    return selectedPaper;
   };
 
-  const onSubmit = (data: unknown) => console.log(data);
+  const onSubmit = handleSubmit((data) => {
+    const selectedPaper = getPaperById(data.paper);
+
+    // Quantidade por folha = ((lagura do papel - 2 * sangria) * (altura do papel - 2 * sangria)) / (largura do objeto * altura do objeto)
+
+    const qtdPorFolha = Math.floor(
+      (((selectedPaper.width - 2 * data.bloodLetting) / 100) *
+        (selectedPaper.height - (2 * data.bloodLetting) / 100)) /
+        ((data.width * data.height) / 100)
+    );
+
+    //Largura provisoria = (lagura do papel - 2*sangria) / (largura do objeto)  arredondado pra baixo
+    const larguraProvisoria = Math.floor(
+      (selectedPaper.width - 2 * data.bloodLetting) / data.width);
+
+    //Altura provisoria = (altura do papel - 2*sangria) / (altura do objeto)) arredondado para baixo
+
+    const alturaProvisoria = Math.floor(
+      (selectedPaper.height - 2 * data.bloodLetting) / data.height);
+
+    const total1 = larguraProvisoria * alturaProvisoria;
+
+    //Largura provisoria 2 = (lagura do papel - 2*sangria) / (altura do objeto)  arredondado pra baixo
+    const larguraProvisoria2 = Math.floor(
+      (selectedPaper.width - 2 * data.bloodLetting) / data.height);
+
+    //Altura provisoria2 = (altura do papel - 2*sangria) / (largura do objeto)) arredondado para baixo
+
+    const alturaProvisoria2 = Math.floor(
+      (selectedPaper.height - 2 * data.bloodLetting) / data.width);
+
+    const total2 = larguraProvisoria2 * alturaProvisoria2;
+
+    const totalGeral = Math.max(total1, total2);
+
+
+
+    //Quantidade de folha = (Quantidade de objeto  / quantidade por folha)
+    const qtdFolha = Math.ceil(data.quantity / qtdPorFolha);
+
+    //Custo = (custo imprssão + valor papel) * quantidade de folha
+    const cost = (data.costPerPage + selectedPaper.value) * qtdFolha;
+    console.log(qtdPorFolha, 'qtd por folha');
+    console.log(qtdFolha, 'qt folha');
+    console.log(cost, 'cost');
+
+    setResults({
+      qtdPerPaper: qtdPorFolha,
+      qtdPaper: qtdFolha,
+      cost: cost,
+    });
+  });
 
   return (
     <div className='flex flex-col items-center'>
@@ -50,10 +107,7 @@ function Calculator() {
           <div className='flex justify-center items-center'>X</div>
           <Input type='number' {...register('height')} />
         </div>
-        <form
-          className='flex flex-col items-center'
-          onSubmit={handleSubmit(onSubmit)}
-        >
+        <form className='flex flex-col items-center' onSubmit={onSubmit}>
           <div className='flex flex-col w-96'>
             <Select
               {...register('paper')}
@@ -88,9 +142,24 @@ function Calculator() {
           </div>
           {isSubmitted && (
             <div className='flex flex-col w-full'>
-              <Input className='w-1/2' label='Qtd adesivo por folha' />
-              <Input className='w-1/2' label='Qtd de folhas' />
-              <Input className='w-1/2' label='Custo total' />
+              <Input
+                className='w-1/2'
+                label='Qtd adesivo por folha'
+                value={results.qtdPerPaper}
+                readOnly
+              />
+              <Input
+                className='w-1/2'
+                label='Qtd de folhas'
+                value={results.qtdPaper}
+                readOnly
+              />
+              <Input
+                className='w-1/2'
+                label='Custo total'
+                value={results.cost}
+                readOnly
+              />
             </div>
           )}
         </form>

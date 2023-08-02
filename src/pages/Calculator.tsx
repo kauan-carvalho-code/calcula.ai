@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useState } from 'react';
+import { formatCurrency } from '../utils/formatCurrency';
 
 const schema = yup.object().shape({
   paper: yup.string().required('Selecione o papel'),
@@ -34,55 +35,73 @@ function Calculator() {
   const {
     handleSubmit,
     register,
+    setValue,
     formState: { isSubmitted },
   } = useForm({
     resolver: yupResolver(schema),
   });
 
-  const handleChange = (value: string) => {
-    const selectedPaper = getPaperById(value);
-    return selectedPaper;
-  };
 
   const onSubmit = handleSubmit((data) => {
     const selectedPaper = getPaperById(data.paper);
+    console.log(selectedPaper, 'selected paper')
 
-    // Quantidade por folha = ((lagura do papel - 2 * sangria) * (altura do papel - 2 * sangria)) / (largura do objeto * altura do objeto)
-
-    const qtdPorFolha = Math.floor(
-      (((selectedPaper.width - 2 * data.bloodLetting) / 100) *
-        (selectedPaper.height - (2 * data.bloodLetting) / 100)) /
-        ((data.width * data.height) / 100)
-    );
 
     //Largura provisoria = (lagura do papel - 2*sangria) / (largura do objeto)  arredondado pra baixo
     const larguraProvisoria = Math.floor(
-      (selectedPaper.width - 2 * data.bloodLetting) / data.width);
+      (selectedPaper.width - 2 * data.bloodLetting) / data.width
+    );
+
+    console.log(selectedPaper.height, 'largura do papel')
+    console.log(data.bloodLetting, 'sangria')
+    console.log(data.width, 'largura do objeto')
+
+    console.log(larguraProvisoria, 'largura provisoria')
 
     //Altura provisoria = (altura do papel - 2*sangria) / (altura do objeto)) arredondado para baixo
 
     const alturaProvisoria = Math.floor(
-      (selectedPaper.height - 2 * data.bloodLetting) / data.height);
+      (selectedPaper.height - 2 * data.bloodLetting) / data.height
+    );
+
+    console.log(alturaProvisoria, 'altura provisoria');
+    
 
     const total1 = larguraProvisoria * alturaProvisoria;
 
+    console.log(total1, 'total 1')
+
     //Largura provisoria 2 = (lagura do papel - 2*sangria) / (altura do objeto)  arredondado pra baixo
     const larguraProvisoria2 = Math.floor(
-      (selectedPaper.width - 2 * data.bloodLetting) / data.height);
+      (selectedPaper.width - 2 * data.bloodLetting) / data.height
+    );
+
+    console.log(larguraProvisoria2, 'largura provisoria 2')
 
     //Altura provisoria2 = (altura do papel - 2*sangria) / (largura do objeto)) arredondado para baixo
 
     const alturaProvisoria2 = Math.floor(
-      (selectedPaper.height - 2 * data.bloodLetting) / data.width);
+      (selectedPaper.height - 2 * data.bloodLetting) / data.width
+    );
+
+    console.log(alturaProvisoria2, 'altura provisoria 2')
 
     const total2 = larguraProvisoria2 * alturaProvisoria2;
 
+    console.log(total2, 'total 2')
+
     const totalGeral = Math.max(total1, total2);
 
+    console.log(totalGeral, 'total geral')
 
+    const qtdPorFolha = totalGeral;
+
+    console.log(qtdPorFolha, 'qtd por folha')
 
     //Quantidade de folha = (Quantidade de objeto  / quantidade por folha)
     const qtdFolha = Math.ceil(data.quantity / qtdPorFolha);
+
+    console.log(qtdFolha, 'qtd folha')
 
     //Custo = (custo imprssão + valor papel) * quantidade de folha
     const cost = (data.costPerPage + selectedPaper.value) * qtdFolha;
@@ -115,7 +134,7 @@ function Calculator() {
               id='paper'
               className='w-full'
               options={papers}
-              onChange={(e) => handleChange(e.target.value)}
+              onChange={(e) => setValue('paper', e.target.value)}
             />
 
             <Input
@@ -157,7 +176,7 @@ function Calculator() {
               <Input
                 className='w-1/2'
                 label='Custo total'
-                value={results.cost}
+                value={formatCurrency(results.cost/100)}
                 readOnly
               />
             </div>

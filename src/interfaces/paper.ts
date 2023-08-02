@@ -4,6 +4,7 @@ export interface PaperWithoutId {
   height: number;
   value: number;
   grammage: number;
+  label?:string;
 }
 
 export interface Paper extends PaperWithoutId {

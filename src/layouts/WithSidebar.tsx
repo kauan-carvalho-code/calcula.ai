@@ -9,7 +9,7 @@ interface SideBarProps {
   children: React.ReactNode;
 }
 
-export const SideBar = ({ children }: SideBarProps) => {
+export const WithSideBar = ({ children }: SideBarProps) => {
   return (
     <div className="w-screen h-screen">
       <aside className="fixed top-0 left-0 z-10 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0">

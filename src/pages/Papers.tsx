@@ -15,7 +15,7 @@ import { usePapers } from "../hooks/usePapers";
 // Utils
 import { formatCurrency } from "../utils/formatCurrency";
 
-function Papers() {
+const Papers = () => {
   /*
    * Hooks
    */
@@ -28,7 +28,7 @@ function Papers() {
   const location = useLocation();
 
   return (
-    <div className="w-full flex flex-col gap-8">
+    <div className="flex flex-col gap-8 w-full">
       <div className="flex items-center justify-between">
         <SearchBar value={query} onChange={(event) => setQuery(event.currentTarget.value)} />
 

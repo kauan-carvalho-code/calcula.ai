@@ -1,190 +1,168 @@
-import { Button } from '../components/Button';
-import { Input } from '../components/Input';
-import { Select } from '../components/Select';
-import { usePapers } from '../hooks/usePapers';
+import { useState } from "react";
 
-import { useForm } from 'react-hook-form';
-import * as yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useState } from 'react';
-import { formatCurrency } from '../utils/formatCurrency';
+import { GrClose } from "react-icons/gr";
 
-const schema = yup.object().shape({
-  paper: yup.string().required('Selecione o papel'),
-  quantity: yup
-    .number()
-    .required('Digite a quantidade')
-    .positive('A quantidade deve ser maior que zero'),
-  costPerPage: yup
-    .number()
-    .required('Digite o custo por página')
-    .positive('O custo por página deve ser maior que zero'),
-  bloodLetting: yup.number().required(),
-  height: yup.number().required(),
-  width: yup.number().required(),
-});
+import { useForm } from "react-hook-form";
 
-function Calculator() {
-  const { papers, getPaperById } = usePapers();
+import { yupResolver } from "@hookform/resolvers/yup";
+
+import * as Yup from "yup";
+
+// Hooks
+import { usePapers } from "../hooks/usePapers";
+
+// Components
+import { Input } from "../components/Input";
+import { Button } from "../components/Button";
+import { Select } from "../components/Select";
+
+// Utils
+import { formatCurrency } from "../utils/formatCurrency";
+
+const schema = Yup.object({
+  width: Yup.number().required(),
+  height: Yup.number().required(),
+  paperId: Yup.string().required(),
+  quantity: Yup.number().required(),
+  costPerPage: Yup.number().required(),
+  bloodLetting: Yup.number().required(),
+}).required();
+
+const Calculator = () => {
+  /*
+   * Hooks
+   */
   const [results, setResults] = useState({
-    qtdPerPaper: 0,
-    qtdPaper: 0,
-    cost: 0,
+    maxObjectsPerSheet: 0,
+    sheetsRequired: 0,
+    totalCost: 0,
   });
 
+  const { papers, getPaperById } = usePapers();
+
   const {
-    handleSubmit,
     register,
-    setValue,
-    formState: { isSubmitted },
+    handleSubmit,
+    formState: { isValid, isSubmitting, isSubmitSuccessful },
   } = useForm({
     resolver: yupResolver(schema),
   });
 
-
   const onSubmit = handleSubmit((data) => {
-    const selectedPaper = getPaperById(data.paper);
-    console.log(selectedPaper, 'selected paper')
+    // Obter informações do papel selecionado
+    const selectedPaper = getPaperById(data.paperId);
 
-
-    //Largura provisoria = (lagura do papel - 2*sangria) / (largura do objeto)  arredondado pra baixo
-    const larguraProvisoria = Math.floor(
+    // Calcula a largura provisória
+    const provisionalWidth = Math.floor(
       (selectedPaper.width - 2 * data.bloodLetting) / data.width
     );
 
-    console.log(selectedPaper.height, 'largura do papel')
-    console.log(data.bloodLetting, 'sangria')
-    console.log(data.width, 'largura do objeto')
-
-    console.log(larguraProvisoria, 'largura provisoria')
-
-    //Altura provisoria = (altura do papel - 2*sangria) / (altura do objeto)) arredondado para baixo
-
-    const alturaProvisoria = Math.floor(
+    // Calcula a altura provisória
+    const provisionalHeight = Math.floor(
       (selectedPaper.height - 2 * data.bloodLetting) / data.height
     );
 
-    console.log(alturaProvisoria, 'altura provisoria');
-    
+    // Calcula o total de objetos por folha
+    const totalObjectsPerSheet = provisionalWidth * provisionalHeight;
 
-    const total1 = larguraProvisoria * alturaProvisoria;
-
-    console.log(total1, 'total 1')
-
-    //Largura provisoria 2 = (lagura do papel - 2*sangria) / (altura do objeto)  arredondado pra baixo
-    const larguraProvisoria2 = Math.floor(
+    // Calcula largura provisória alternativa
+    const altProvisionalWidth = Math.floor(
       (selectedPaper.width - 2 * data.bloodLetting) / data.height
     );
 
-    console.log(larguraProvisoria2, 'largura provisoria 2')
-
-    //Altura provisoria2 = (altura do papel - 2*sangria) / (largura do objeto)) arredondado para baixo
-
-    const alturaProvisoria2 = Math.floor(
+    // Calcula a altura provisória alternativa
+    const altProvisionalHeight = Math.floor(
       (selectedPaper.height - 2 * data.bloodLetting) / data.width
     );
 
-    console.log(alturaProvisoria2, 'altura provisoria 2')
+    // Calcula o total de objetos por folha para a alternativa
+    const altTotalObjectsPerSheet = altProvisionalWidth * altProvisionalHeight;
 
-    const total2 = larguraProvisoria2 * alturaProvisoria2;
+    // Escolhe o maior total de objetos por folha
+    const maxObjectsPerSheet = Math.max(
+      totalObjectsPerSheet,
+      altTotalObjectsPerSheet
+    );
 
-    console.log(total2, 'total 2')
+    // Calcula a quantidade de folhas necessárias
+    const sheetsRequired = Math.ceil(data.quantity / maxObjectsPerSheet);
 
-    const totalGeral = Math.max(total1, total2);
+    // Calcula o custo total
+    const totalCost = (data.costPerPage + selectedPaper.value) * sheetsRequired;
 
-    console.log(totalGeral, 'total geral')
-
-    const qtdPorFolha = totalGeral;
-
-    console.log(qtdPorFolha, 'qtd por folha')
-
-    //Quantidade de folha = (Quantidade de objeto  / quantidade por folha)
-    const qtdFolha = Math.ceil(data.quantity / qtdPorFolha);
-
-    console.log(qtdFolha, 'qtd folha')
-
-    //Custo = (custo imprssão + valor papel) * quantidade de folha
-    const cost = (data.costPerPage + selectedPaper.value) * qtdFolha;
-    console.log(qtdPorFolha, 'qtd por folha');
-    console.log(qtdFolha, 'qt folha');
-    console.log(cost, 'cost');
-
-    setResults({
-      qtdPerPaper: qtdPorFolha,
-      qtdPaper: qtdFolha,
-      cost: cost,
-    });
+    // Atualizar os resultados
+    setResults({ maxObjectsPerSheet, sheetsRequired, totalCost });
   });
 
   return (
-    <div className='flex flex-col items-center'>
-      <h1>Calculadora de unidades por página</h1>
-      <div className='flex flex-col items-center mt-5 '>
-        <h3 className='mb-5'>Tamanho do material (L x A) em mm</h3>
-        <div className='flex gap-2 mb-6'>
-          <Input type='number' {...register('width')} />
-          <div className='flex justify-center items-center'>X</div>
-          <Input type='number' {...register('height')} />
-        </div>
-        <form className='flex flex-col items-center' onSubmit={onSubmit}>
-          <div className='flex flex-col w-96'>
-            <Select
-              {...register('paper')}
-              name='Selecione o Papel'
-              id='paper'
-              className='w-full'
-              options={papers}
-              onChange={(e) => setValue('paper', e.target.value)}
+    <div className="flex items-center justify-center w-full">
+      <div className="flex flex-col gap-6 w-[412px]">
+        <h1 className="text-4xl font-medium text-center">Calculadora</h1>
+
+        <form className="flex flex-col gap-2" onSubmit={onSubmit}>
+          <div className="flex items-center justify-between gap-4">
+            <Input type="number" label="Largura (mm):" {...register("width")} />
+
+            <span className="pt-5">
+              <GrClose />
+            </span>
+
+            <Input type="number" label="Altura (mm):" {...register("height")} />
+          </div>
+
+          <Select
+            label="Selecione o papel:"
+            options={papers}
+            {...register("paperId")}
+          />
+
+          <Input
+            type="number"
+            label="Quantidade (un):"
+            {...register("quantity")}
+          />
+
+          <Input
+            type="number"
+            label="Custo página:"
+            {...register("costPerPage")}
+          />
+
+          <Input type="number" label="Sangria:" {...register("bloodLetting")} />
+
+          <Button
+            type="submit"
+            className="w-full mt-4"
+            disabled={!isValid || isSubmitting}
+          >
+            Calcular
+          </Button>
+        </form>
+
+        {isSubmitSuccessful ? (
+          <div>
+            <Input
+              label="Quantidade de adesivo por folha:"
+              value={results.maxObjectsPerSheet}
+              disabled
             />
 
             <Input
-              {...register('quantity')}
-              className='w-full'
-              id='quantity'
-              label='Quantidade (un)'
+              label="Quantidade de folhas:"
+              value={results.sheetsRequired}
+              disabled
             />
+
             <Input
-              {...register('costPerPage')}
-              className='w-full'
-              id='costPerPage'
-              label='Custo página'
+              label="Custo total:"
+              value={formatCurrency(results.totalCost / 100)}
+              disabled
             />
-            <Input
-              {...register('bloodLetting')}
-              className='w-full'
-              id='bloodLetting'
-              label='Sangria'
-            />
-            <Button type='submit' id='calculate' className='mt-2 w-20 self-end'>
-              Calcular
-            </Button>
           </div>
-          {isSubmitted && (
-            <div className='flex flex-col w-full'>
-              <Input
-                className='w-1/2'
-                label='Qtd adesivo por folha'
-                value={results.qtdPerPaper}
-                readOnly
-              />
-              <Input
-                className='w-1/2'
-                label='Qtd de folhas'
-                value={results.qtdPaper}
-                readOnly
-              />
-              <Input
-                className='w-1/2'
-                label='Custo total'
-                value={formatCurrency(results.cost/100)}
-                readOnly
-              />
-            </div>
-          )}
-        </form>
+        ) : null}
       </div>
     </div>
   );
-}
+};
 
 export default Calculator;

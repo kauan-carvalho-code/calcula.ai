@@ -60,11 +60,11 @@ const Edit = () => {
         <Input type="number" label="Valor (un):" {...register("value")} />
 
         <div className="flex items-center gap-4 pt-6">
-          <Button type="button" onClick={backToPreviousPage} variant="ghost" responsive>
+          <Button type="button" onClick={backToPreviousPage} variant="ghost" className="w-full">
             Cancelar
           </Button>
 
-          <Button type="submit" responsive disabled={!isValid || isSubmitting} isLoading={isSubmitting}>
+          <Button type="submit" className="w-full" disabled={!isValid || isSubmitting} isLoading={isSubmitting}>
             Editar
           </Button>
         </div>

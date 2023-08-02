@@ -2,6 +2,8 @@ import React, { forwardRef } from 'react';
 
 import { CgSpinner } from 'react-icons/cg';
 
+import { twMerge } from 'tailwind-merge';
+
 const defaultStyles =
   'flex items-center justify-center gap-2 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-violet-600';
 
@@ -12,21 +14,18 @@ const buttonVariants = {
 
 interface ButtonProps extends React.ComponentProps<'button'> {
   variant?: keyof typeof buttonVariants;
-  responsive?: boolean;
   isLoading?: boolean;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    { children, variant = 'solid', responsive, isLoading, className, ...rest },
+    { children, variant = 'solid', isLoading, className, ...rest },
     ref
   ) => (
     <button
       ref={ref}
       {...rest}
-      className={`${defaultStyles} ${buttonVariants[variant]} ${
-        responsive ? 'w-full' : 'w-auto'
-      } ${className}`}
+      className={twMerge(defaultStyles, buttonVariants[variant], className)}
     >
       {isLoading ? <CgSpinner className='text-lg animate-spin' /> : null}
 

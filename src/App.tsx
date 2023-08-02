@@ -7,7 +7,7 @@ import Create from "./pages/Create";
 import Edit from "./pages/Edit";
 
 // Layout
-import { WithSideBar } from "./layouts/WithSidebar";
+import { Default } from "./layouts/Default";
 import { WithDialog } from "./layouts/WithDialog";
 
 // Context
@@ -22,7 +22,7 @@ function App() {
   const previousLocation = location.state?.previousLocation;
 
   return (
-    <WithSideBar>
+    <Default>
       <PapersProvider>
           <Routes location={previousLocation || location}>
             <Route path="/" element={<Papers />} />
@@ -40,7 +40,7 @@ function App() {
             </Routes>
           ) : null}
       </PapersProvider>
-    </WithSideBar>
+    </Default>
   );
 }
 

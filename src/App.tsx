@@ -24,21 +24,21 @@ function App() {
   return (
     <Default>
       <PapersProvider>
-          <Routes location={previousLocation || location}>
-            <Route path="/" element={<Papers />} />
+        <Routes location={previousLocation || location}>
+          <Route path="/" element={<Papers />} />
 
-            <Route path="calculadora" element={<Calculator />} />
+          <Route path="calculadora" element={<Calculator />} />
+        </Routes>
+
+        {previousLocation ? (
+          <Routes>
+            <Route element={<WithDialog />}>
+              <Route path="criar" element={<Create />} />
+
+              <Route path="editar/:paperId" element={<Edit />} />
+            </Route>
           </Routes>
-
-          {previousLocation ? (
-            <Routes>
-              <Route element={<WithDialog />}>
-                <Route path="criar" element={<Create />} />
-
-                <Route path="editar/:paperId" element={<Edit />} />
-              </Route>
-            </Routes>
-          ) : null}
+        ) : null}
       </PapersProvider>
     </Default>
   );

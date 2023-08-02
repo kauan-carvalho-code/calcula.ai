@@ -19,18 +19,24 @@ const Papers = () => {
   /*
    * Hooks
    */
-  const { papers, deletePaper } = usePapers();  
+  const { papers, deletePaper } = usePapers();
 
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
 
-  const filteredPapers = useMemo(() => papers.filter(paper => paper.name.includes(query)), [ papers, query ]);
+  const filteredPapers = useMemo(
+    () => papers.filter((paper) => paper.name.includes(query)),
+    [papers, query]
+  );
 
   const location = useLocation();
 
   return (
     <div className="flex flex-col gap-8 w-full">
       <div className="flex items-center justify-between">
-        <SearchBar value={query} onChange={(event) => setQuery(event.currentTarget.value)} />
+        <SearchBar
+          value={query}
+          onChange={(event) => setQuery(event.currentTarget.value)}
+        />
 
         <Anchor to="criar" state={{ previousLocation: location }}>
           Novo papel
@@ -63,7 +69,11 @@ const Papers = () => {
 
         <tbody>
           {filteredPapers.map((paper, index) => (
-            <tr key={paper.id} className="border-b bg-white data-[even=false]:bg-neutral-50" data-even={index % 2 === 0}>
+            <tr
+              key={paper.id}
+              className="border-b bg-white data-[even=false]:bg-neutral-50"
+              data-even={index % 2 === 0}
+            >
               <td scope="row" className="px-6 py-3">
                 {paper.id}
               </td>
@@ -79,7 +89,10 @@ const Papers = () => {
               <td scope="row" className="px-6 py-3">
                 {formatCurrency(paper.value / 100)}
               </td>
-              <td scope="row" className="flex items-center justify-start text-lg pt-3.5 gap-4 px-6 py-3">
+              <td
+                scope="row"
+                className="flex items-center justify-start text-lg pt-3.5 gap-4 px-6 py-3"
+              >
                 <Link
                   to={`editar/${paper.id}`}
                   state={{ previousLocation: location }}
@@ -101,6 +114,6 @@ const Papers = () => {
       </table>
     </div>
   );
-}
+};
 
 export default Papers;
